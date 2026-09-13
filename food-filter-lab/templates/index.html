@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美食短片滤镜实验台</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🍳 美食短片滤镜实验台</div>
+  <div class="tagline">上传做菜视频 → 选模板 → 微调饱和/对比 → 看帧预览与生成命令</div>
+</header>
+
+<main class="layout">
+  <!-- 左：预览区 -->
+  <section class="panel preview-panel">
+    <div id="dropzone" class="dropzone">
+      <div class="dz-inner">
+        <div class="dz-icon">⬆️</div>
+        <div class="dz-text">点击或拖拽上传做菜视频</div>
+        <div class="dz-hint">mp4 / mov / webm 等，≤200MB，≤10 分钟</div>
+      </div>
+      <input type="file" id="fileInput" accept="video/*" hidden>
+    </div>
+
+    <div id="uploadMeta" class="upload-meta hidden"></div>
+
+    <div class="stage-wrap hidden" id="stageWrap">
+      <div class="stage" id="stage">
+        <img id="origImg" alt="原始帧">
+        <img id="outImg" alt="滤镜帧">
+        <div class="stage-label lbl-orig">原始</div>
+        <div class="stage-label lbl-out">滤镜</div>
+        <div class="compare-handle" id="compareHandle"></div>
+      </div>
+      <input type="range" id="compareSlider" min="0" max="100" value="50" class="compare-slider">
+      <div class="frame-row" id="frameRow"></div>
+    </div>
+
+    <div id="status" class="status hidden"></div>
+  </section>
+
+  <!-- 右：控制台 -->
+  <aside class="panel control-panel">
+    <h2 class="h-title">① 选择滤镜模板</h2>
+    <div class="preset-grid" id="presetGrid">
+      <div class="loading-hint">模板加载中…</div>
+    </div>
+
+    <h2 class="h-title">② 微调参数</h2>
+    <div class="slider-block">
+      <div class="slider-head">
+        <label>饱和度</label>
+        <span id="satVal" class="val-badge">1.00×</span>
+      </div>
+      <input type="range" id="sat" min="0.5" max="1.8" step="0.01" value="1">
+    </div>
+    <div class="slider-block">
+      <div class="slider-head">
+        <label>对比度</label>
+        <span id="conVal" class="val-badge">1.00×</span>
+      </div>
+      <input type="range" id="con" min="0.7" max="1.5" step="0.01" value="1">
+    </div>
+
+    <div class="actions">
+      <button id="previewBtn" class="btn primary" disabled>刷新帧预览</button>
+      <button id="renderBtn" class="btn ghost" disabled>渲染整片并下载</button>
+    </div>
+    <a id="downloadLink" class="download-link hidden" href="#" target="_blank">⬇️ 下载渲染结果 MP4</a>
+
+    <h2 class="h-title">③ 生成命令（服务端白名单拼装）</h2>
+    <div class="resolved" id="resolvedBox"></div>
+    <div class="cmd-tabs">
+      <button class="cmd-tab active" data-tab="render">整片命令</button>
+      <button class="cmd-tab" data-tab="preview">单帧命令</button>
+    </div>
+    <pre class="cmd-box" id="cmdBox"><code>等待预览…</code></pre>
+    <p class="security-note">
+      🔒 前端只提交 <code>preset / saturation / contrast</code>；
+      滤镜链由后端白名单引擎生成，经 argv 列表调用 ffmpeg，<b>不接受任何用户 shell 或 -vf 字符串</b>。
+    </p>
+  </aside>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
